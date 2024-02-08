@@ -1,0 +1,10 @@
+package components
+
+import "github.com/Linkinlog/quotes/models"
+
+templ Quote(q *models.Quote) {
+	<blockquote>
+		<p>"{ q.Content() }"</p>
+		<footer>- { q.Author() }</footer>
+	</blockquote>
+}

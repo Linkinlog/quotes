@@ -1,0 +1,9 @@
+package components
+
+import "github.com/Linkinlog/quotes/models"
+
+templ Quotes(q []*models.Quote) {
+	for _, quote := range q {
+        @Quote(quote)
+    }
+}
