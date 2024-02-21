@@ -1,10 +1,11 @@
 package components
 
 import "github.com/Linkinlog/quotes/models"
+import "fmt"
 
 templ Quote(q *models.Quote) {
-	<blockquote>
-		<p>"{ q.Content() }"</p>
-		<footer>- { q.Author() }</footer>
+	<blockquote id={ fmt.Sprintf("%v", q.Id) }>
+		<p>"{ q.Content }"</p>
+		<footer>- { q.Author }</footer>
 	</blockquote>
 }

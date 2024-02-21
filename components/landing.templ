@@ -1,9 +1,10 @@
 package components
 
 templ Landing() {
-				<img id="wisePup" src="/assets/wisePup.jpeg" alt="wise pup" /> <br />
-                <h1>Wise Pup</h1>
-                <p>Get a random quote from a wise pup</p>
-				<button hx-get="/quotes" hx-vals='{"id": "random"}' hx-target="#quote">Get a quote</button>
-				<div id="quote"></div>
+	<img id="wisePup" src="/assets/wisePup.jpeg" alt="wise pup"/>
+	<br/>
+	<h1>Wise Pup</h1>
+	<p>Get a random quote from a wise pup</p>
+	<button hx-get="/quotes/random" hx-target="#quote">Get a quote</button>
+	<div id="quote"></div>
 }

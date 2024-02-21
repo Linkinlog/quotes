@@ -5,8 +5,12 @@ import (
 	"github.com/google/uuid"
 )
 
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 -generate
+
+//counterfeiter:generate . QuoteStore
+
 type QuoteStore interface {
-	ById(id uuid.UUID) (*models.Quote, error)
-	Random() (*models.Quote, error)
+	Insert(*models.Quote) error
+	QueryById(uuid.UUID) (*models.Quote, error)
 	All() ([]*models.Quote, error)
 }

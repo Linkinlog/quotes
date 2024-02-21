@@ -23,7 +23,7 @@ func Landing() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<img id=\"wisePup\" src=\"/assets/wisePup.jpeg\" alt=\"wise pup\"><br><h1>Wise Pup</h1><p>Get a random quote from a wise pup</p><button hx-get=\"/quotes\" hx-vals=\"{&#34;id&#34;: &#34;random&#34;}\" hx-target=\"#quote\">Get a quote</button><div id=\"quote\"></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<img id=\"wisePup\" src=\"/assets/wisePup.jpeg\" alt=\"wise pup\"><br><h1>Wise Pup</h1><p>Get a random quote from a wise pup</p><button hx-get=\"/quotes/random\" hx-target=\"#quote\">Get a quote</button><div id=\"quote\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
