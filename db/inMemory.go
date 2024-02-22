@@ -30,3 +30,23 @@ func (s *inMemoryStore) QueryById(id uuid.UUID) (*models.Quote, error) {
 	}
 	return &models.Quote{}, nil
 }
+
+func (s *inMemoryStore) Update(q *models.Quote) error {
+	for i, quote := range s.quotes {
+		if quote.Id == q.Id {
+			s.quotes[i] = q
+			return nil
+		}
+	}
+	return nil
+}
+
+func (s *inMemoryStore) Delete(id uuid.UUID) error {
+	for i, q := range s.quotes {
+		if q.Id == id {
+			s.quotes[i].Disapprove()
+			return nil
+		}
+	}
+	return nil
+}

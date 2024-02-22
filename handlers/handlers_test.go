@@ -2,6 +2,7 @@ package handlers_test
 
 import (
 	"errors"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -23,7 +24,7 @@ func TestHandler_HandleRoutes(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			handler := handlers.NewHandler(tc.quoteRepository)
+			handler := handlers.NewHandler(tc.quoteRepository, "secret", true)
 			if handler == nil {
 				t.Fail()
 			}
@@ -34,22 +35,13 @@ func TestHandler_HandleRoutes(t *testing.T) {
 }
 
 func TestHandler_HandleLanding(t *testing.T) {
-	tests := map[string]struct {
-		quoteRepository *repository.QuoteRepository
-		forceError      bool
-	}{
-		"valid repository": {
-			quoteRepository: &repository.QuoteRepository{},
-		},
-		"invalid repository": {
-			quoteRepository: &repository.QuoteRepository{},
-			forceError:      true,
-		},
+	tests := map[string]struct{}{
+		"valid repository": {},
 	}
 
-	for name, tc := range tests {
+	for name := range tests {
 		t.Run(name, func(t *testing.T) {
-			handler := handlers.NewHandler(tc.quoteRepository)
+			handler := handlers.NewHandler(&repository.QuoteRepository{}, "secret", true)
 			if handler == nil {
 				t.Fail()
 			}
@@ -69,15 +61,11 @@ func TestHandler_HandleLanding(t *testing.T) {
 func TestHandler_HandleRandomQuote(t *testing.T) {
 	fakeDb := &dbfakes.FakeQuoteStore{}
 	tests := map[string]struct {
-		quoteRepository *repository.QuoteRepository
-		wantErr         bool
+		wantErr bool
 	}{
-		"valid repository": {
-			quoteRepository: repository.NewQuoteRepository(fakeDb),
-		},
+		"valid repository": {},
 		"invalid repository": {
-			quoteRepository: repository.NewQuoteRepository(fakeDb),
-			wantErr:         true,
+			wantErr: true,
 		},
 	}
 
@@ -88,7 +76,7 @@ func TestHandler_HandleRandomQuote(t *testing.T) {
 			} else {
 				fakeDb.AllReturns([]*models.Quote{models.NewQuote("foo", "bar")}, nil)
 			}
-			handler := handlers.NewHandler(tc.quoteRepository)
+			handler := handlers.NewHandler(repository.NewQuoteRepository(fakeDb), "secret", true)
 			if handler == nil {
 				t.Fatal("handler is nil")
 			}
@@ -110,24 +98,20 @@ func TestHandler_HandleRandomQuote(t *testing.T) {
 func TestHandler_HandleQuoteById(t *testing.T) {
 	fakeDb := &dbfakes.FakeQuoteStore{}
 	tests := map[string]struct {
-		quoteRepository *repository.QuoteRepository
-		wantErr         bool
-		wantBadRequest  bool
-		id              uuid.UUID
+		wantErr        bool
+		wantBadRequest bool
+		id             uuid.UUID
 	}{
 		"valid repository": {
-			quoteRepository: repository.NewQuoteRepository(fakeDb),
-			id:              uuid.New(),
+			id: uuid.New(),
 		},
 		"invalid repository": {
-			quoteRepository: repository.NewQuoteRepository(fakeDb),
-			wantErr:         true,
-			id:              uuid.New(),
+			wantErr: true,
+			id:      uuid.New(),
 		},
 		"invalid id": {
-			quoteRepository: repository.NewQuoteRepository(fakeDb),
-			wantBadRequest:  true,
-			id:              uuid.Nil,
+			wantBadRequest: true,
+			id:             uuid.Nil,
 		},
 	}
 
@@ -138,7 +122,7 @@ func TestHandler_HandleQuoteById(t *testing.T) {
 			} else {
 				fakeDb.QueryByIdReturns(&models.Quote{Id: tc.id, Content: "hi", Author: "me"}, nil)
 			}
-			handler := handlers.NewHandler(tc.quoteRepository)
+			handler := handlers.NewHandler(repository.NewQuoteRepository(fakeDb), "secret", true)
 			if handler == nil {
 				t.Fatal("handler is nil")
 			}
@@ -162,17 +146,13 @@ func TestHandler_HandleQuoteById(t *testing.T) {
 }
 
 func TestHandler_HandleAbout(t *testing.T) {
-	tests := map[string]struct {
-		quoteRepository *repository.QuoteRepository
-	}{
-		"valid repository": {
-			quoteRepository: &repository.QuoteRepository{},
-		},
+	tests := map[string]struct{}{
+		"valid": {},
 	}
 
-	for name, tc := range tests {
+	for name := range tests {
 		t.Run(name, func(t *testing.T) {
-			handler := handlers.NewHandler(tc.quoteRepository)
+			handler := handlers.NewHandler(&repository.QuoteRepository{}, "secret", true)
 			if handler == nil {
 				t.Fail()
 			}
@@ -192,15 +172,11 @@ func TestHandler_HandleAbout(t *testing.T) {
 func TestHandler_HandleQuotes(t *testing.T) {
 	fakeDb := &dbfakes.FakeQuoteStore{}
 	tests := map[string]struct {
-		quoteRepository *repository.QuoteRepository
-		wantErr         bool
+		wantErr bool
 	}{
-		"valid repository": {
-			quoteRepository: repository.NewQuoteRepository(fakeDb),
-		},
+		"valid repository": {},
 		"invalid repository": {
-			quoteRepository: repository.NewQuoteRepository(fakeDb),
-			wantErr:         true,
+			wantErr: true,
 		},
 	}
 
@@ -211,7 +187,7 @@ func TestHandler_HandleQuotes(t *testing.T) {
 			} else {
 				fakeDb.AllReturns([]*models.Quote{models.NewQuote("foo", "bar")}, nil)
 			}
-			handler := handlers.NewHandler(tc.quoteRepository)
+			handler := handlers.NewHandler(repository.NewQuoteRepository(fakeDb), "secret", true)
 			if handler == nil {
 				t.Fatal("handler is nil")
 			}
@@ -225,6 +201,141 @@ func TestHandler_HandleQuotes(t *testing.T) {
 				t.Fail()
 			} else if rr.Code != 500 && tc.wantErr {
 				t.Fail()
+			}
+		})
+	}
+}
+
+func TestHandler_HandleAuthMiddleware(t *testing.T) {
+	tests := map[string]struct {
+		shouldAuth bool
+	}{
+		"authenticated": {
+			shouldAuth: true,
+		},
+		"unauthenticated": {
+			shouldAuth: false,
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			handler := handlers.NewHandler(&repository.QuoteRepository{}, "secret", true)
+			if handler == nil {
+				t.Fail()
+			}
+
+			rr := httptest.NewRecorder()
+			req := httptest.NewRequest("GET", "/", nil)
+
+			if tc.shouldAuth {
+				req.AddCookie(&http.Cookie{
+					Name:  "auth",
+					Value: "secret",
+				})
+			}
+
+			handler.HandleAuthMiddleware(
+				http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					w.WriteHeader(http.StatusOK)
+				})).ServeHTTP(rr, req)
+
+			if rr.Code != 200 {
+				t.Fatal("expected 200, got", rr.Code)
+			}
+		})
+	}
+}
+
+func TestHandler_HandleCreateQuote(t *testing.T) {
+	fakeDb := &dbfakes.FakeQuoteStore{}
+	tests := map[string]struct {
+		wantErr bool
+		q       *models.Quote
+	}{
+		"valid quote": {
+			q: models.NewQuote("foo", "bar"),
+		},
+		"invalid quote": {
+			wantErr: true,
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			handler := handlers.NewHandler(repository.NewQuoteRepository(fakeDb), "secret", true)
+			if handler == nil {
+				t.Fail()
+			}
+
+			req := httptest.NewRequest("POST", "/quotes", nil)
+			rr := httptest.NewRecorder()
+
+			if tc.q != nil {
+				req.Form = map[string][]string{
+					"content": {tc.q.Content},
+					"author":  {tc.q.Author},
+				}
+			}
+
+			if tc.wantErr {
+				req.Body = nil
+			}
+
+			handler.HandleCreateQuote(rr, req)
+
+			if rr.Code != 200 && !tc.wantErr {
+				t.Fatal("expected 200, got", rr.Code)
+			} else if rr.Code != 500 && tc.wantErr {
+				t.Fatal("expected 500, got", rr.Code)
+			}
+		})
+	}
+}
+
+func TestHandler_HandleUpdateQuote(t *testing.T) {
+	tests := map[string]struct {
+		wantErr bool
+		q       *models.Quote
+	}{
+		"valid quote": {
+			q: models.NewQuote("foo", "bar"),
+		},
+		"invalid quote": {
+			wantErr: true,
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			fakeDb := &dbfakes.FakeQuoteStore{}
+			fakeDb.QueryByIdReturns(&models.Quote{Id: uuid.New(), Content: "hi", Author: "me"}, nil)
+			handler := handlers.NewHandler(repository.NewQuoteRepository(fakeDb), "secret", true)
+			if handler == nil {
+				t.Fail()
+			}
+
+			req := httptest.NewRequest("PUT", "/quotes", nil)
+			rr := httptest.NewRecorder()
+
+			if tc.q != nil {
+				req.Form = map[string][]string{
+					"content": {tc.q.Content},
+					"author":  {tc.q.Author},
+				}
+				req.SetPathValue("id", tc.q.Id.String())
+			}
+
+			if tc.wantErr {
+				req.Body = nil
+			}
+
+			handler.HandleUpdateQuote(rr, req)
+
+			if rr.Code != 200 && !tc.wantErr {
+				t.Fatal("expected 200, got", rr.Code)
+			} else if rr.Code != 500 && tc.wantErr {
+				t.Fatal("expected 500, got", rr.Code)
 			}
 		})
 	}

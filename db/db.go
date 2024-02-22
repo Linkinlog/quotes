@@ -13,4 +13,6 @@ type QuoteStore interface {
 	Insert(*models.Quote) error
 	QueryById(uuid.UUID) (*models.Quote, error)
 	All() ([]*models.Quote, error)
+	Update(*models.Quote) error
+	Delete(uuid.UUID) error
 }

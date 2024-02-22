@@ -2,7 +2,7 @@ gen:
 	go generate ./...
 dev: 
 	make gen
-	go run .
+	SECRET=secret go run .
 test:
 	go test -v ./...
 test.cov:

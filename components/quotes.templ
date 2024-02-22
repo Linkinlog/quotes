@@ -2,8 +2,10 @@ package components
 
 import "github.com/Linkinlog/quotes/models"
 
-templ Quotes(q []*models.Quote) {
+templ Quotes(q []*models.Quote, admin bool) {
 	for _, quote := range q {
-		@Quote(quote)
+		if quote.Approved() || admin {
+			@Quote(quote, admin)
+		}
 	}
 }

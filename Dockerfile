@@ -14,6 +14,9 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 
 FROM alpine:latest
 
+ARG SECRET
+ENV SECRET=$SECRET
+
 WORKDIR /root/
 
 COPY --from=builder /app/main .

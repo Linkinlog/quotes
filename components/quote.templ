@@ -1,11 +1,29 @@
 package components
 
-import "github.com/Linkinlog/quotes/models"
-import "fmt"
+import (
+	"github.com/Linkinlog/quotes/models"
+	"fmt"
+)
 
-templ Quote(q *models.Quote) {
-	<blockquote id={ fmt.Sprintf("%v", q.Id) }>
-		<p>"{ q.Content }"</p>
-		<footer>- { q.Author }</footer>
-	</blockquote>
+templ Quote(q *models.Quote, admin bool) {
+	if q.Approved()|| admin {
+		<div id={ fmt.Sprintf("quote-%v", q.Id) }>
+			<div hx-get={ fmt.Sprintf("/quotes/%v", q.Id) } hx-push-url={ fmt.Sprintf("/quotes/%v", q.Id) } hx-target="body" class="quote">
+				<blockquote id={ fmt.Sprintf("%v", q.Id) }>
+					<p>"{ q.Content }"</p>
+					<footer>- { q.Author }</footer>
+				</blockquote>
+			</div>
+			if admin {
+				<div>
+					if q.Approved() {
+						<button hx-delete={ fmt.Sprintf("/quotes/%v", q.Id) } hx-target={ fmt.Sprintf("#quote-%v", q.Id) }>Disapprove</button>
+					} else {
+						<button hx-post={ fmt.Sprintf("/quotes/%v/toggle", q.Id) } hx-target={ fmt.Sprintf("#quote-%v", q.Id) }>Approve</button>
+					}
+					<button hx-get={ fmt.Sprintf("/quotes/%v/edit", q.Id) }>Edit</button>
+				</div>
+			}
+		</div>
+	}
 }

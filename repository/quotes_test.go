@@ -127,3 +127,78 @@ func TestRandomQuote(t *testing.T) {
 		})
 	}
 }
+
+func TestInsertQuote(t *testing.T) {
+	tests := map[string]struct {
+		inputQuote *models.Quote
+	}{
+		"valid quote": {
+			inputQuote: &models.Quote{Content: "This is a quote", Author: "John Doe"},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			fakeStore := &dbfakes.FakeQuoteStore{}
+
+			rErr := repository.NewQuoteRepository(fakeStore).Insert(tc.inputQuote.Content, tc.inputQuote.Author)
+
+			if rErr != nil {
+				t.Fail()
+			}
+		})
+	}
+}
+
+func TestUpdateQuote(t *testing.T) {
+	tests := map[string]struct {
+		inputQuote *models.Quote
+		wantError  bool
+		updateMock func(*dbfakes.FakeQuoteStore)
+	}{
+		"valid quote is updated": {
+			inputQuote: &models.Quote{Content: "This is an updated quote", Author: "John Doe"},
+			updateMock: func(fakeStore *dbfakes.FakeQuoteStore) {
+				fakeStore.QueryByIdReturns(&models.Quote{Content: "This is a quote", Author: "John Doe"}, nil)
+			},
+		},
+		"error in queryById": {
+			inputQuote: &models.Quote{Content: "apple", Author: "John"},
+			wantError:  true,
+			updateMock: func(fakeStore *dbfakes.FakeQuoteStore) {
+				fakeStore.QueryByIdReturns(nil, errors.New("generic error"))
+			},
+		},
+		"error in update": {
+			inputQuote: &models.Quote{Content: "apple", Author: "John"},
+			wantError:  true,
+			updateMock: func(fakeStore *dbfakes.FakeQuoteStore) {
+				fakeStore.QueryByIdReturns(&models.Quote{Content: "This is a quote", Author: "John Doe"}, nil)
+				fakeStore.UpdateReturns(errors.New("generic error"))
+			},
+		},
+		"quote not found": {
+			inputQuote: &models.Quote{Content: "apple", Author: "John"},
+			updateMock: func(fakeStore *dbfakes.FakeQuoteStore) {
+				fakeStore.QueryByIdReturns(nil, nil)
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			fakeStore := &dbfakes.FakeQuoteStore{}
+			tc.updateMock(fakeStore)
+
+			q, rErr := repository.NewQuoteRepository(fakeStore).Update(uuid.New(), tc.inputQuote.Content, tc.inputQuote.Author)
+
+			if rErr != nil && !tc.wantError {
+				t.Fail()
+			}
+
+			if q != nil && tc.inputQuote.Content != q.Content {
+				t.Errorf("expected %v; got %v", tc.inputQuote.Content, q.Content)
+			}
+		})
+	}
+}

@@ -1,0 +1,23 @@
+package components
+
+templ AddQuote(showSuccess bool) {
+	<main>
+		if showSuccess {
+			<div class="alert-success">
+				Quote added successfully! Please wait for approval before it appears on the site.
+			</div>
+		}
+		<h1>Add Quote</h1>
+		<form id="add-quote-form" hx-boost="true" action="/quotes" method="post">
+			<div>
+				<label for="quote">Quote</label>
+				<input type="text" id="content" name="content"/>
+			</div>
+			<div>
+				<label for="author">Author</label>
+				<input type="text" id="author" name="author"/>
+			</div>
+			<button type="submit">Add Quote</button>
+		</form>
+	</main>
+}

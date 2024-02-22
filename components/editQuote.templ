@@ -1,0 +1,28 @@
+package components
+
+import (
+	"github.com/Linkinlog/quotes/models"
+	"fmt"
+)
+
+templ EditQuote(quote *models.Quote, showSuccess bool) {
+	<main>
+		if showSuccess {
+			<div class="alert-success">
+				Quote edited successfully!
+			</div>
+		}
+		<h1>Edit Quote</h1>
+		<form id="edit-quote-form" hx-boost="true" action={ templ.SafeURL(fmt.Sprintf("/quotes/%v", quote.Id)) } method="put" hx-target={ fmt.Sprintf("#quote-%v", quote.Id) }>
+			<div>
+				<label for="quote">Quote</label>
+				<input type="text" id="content" name="content" value={ quote.Content }/>
+			</div>
+			<div>
+				<label for="author">Author</label>
+				<input type="text" id="author" name="author" value={ quote.Author }/>
+			</div>
+			<button type="submit">Edit Quote</button>
+		</form>
+	</main>
+}

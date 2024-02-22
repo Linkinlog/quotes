@@ -2,6 +2,7 @@ package main
 
 import (
 	"log/slog"
+	"os"
 
 	"github.com/Linkinlog/quotes/db"
 	"github.com/Linkinlog/quotes/handlers"
@@ -15,14 +16,16 @@ func main() {
 	store := db.NewInMemoryStore(makeQuotes())
 	repo := repository.NewQuoteRepository(store)
 
-	err := handlers.NewHandler(repo).HandleRoutes(addr)
+	secret := os.Getenv("SECRET")
+
+	err := handlers.NewHandler(repo, secret, false).HandleRoutes(addr)
 	if err != nil {
 		slog.Error(err.Error())
 	}
 }
 
 func makeQuotes() []*models.Quote {
-	return []*models.Quote{
+	quotes := []*models.Quote{
 		models.NewQuote("Hello, World.", "Log"),
 		models.NewQuote("Heaven or hell, love or hate, No matter where I turn I meet myself. Holding life precious is Just living with all intensity Holding life precious.", "Opening the Hand of Thought p.81- Kōshō Uchiyama"),
 		models.NewQuote("Regardless of which component you begin at, it is impossible to follow the dependency relationships and wind up back at that component. This structure has no cycles. It is a directed acyclic graph(DAG)", "Clean Architecture Ch 14 - Robert C. Martin"),
@@ -36,6 +39,10 @@ func makeQuotes() []*models.Quote {
 		models.NewQuote("Their overconfidence will drive the redesign into the same mess as the original project.", "Clean Architecture - Robert C. Martin"),
 		models.NewQuote("[..] the Buddha does not offer us palliatives that leave the underlying maladies untouched beneath the surface;", "In The Buddhas Words"),
 		models.NewQuote("Things don’t just happen, they are made to happen", "John F. Kennedy"),
-		models.NewQuote("Things don’t just happen, they are made to happen", "John F. Kennedy"),
 	}
+	for _, q := range quotes {
+		q.Approve()
+	}
+
+	return quotes
 }
