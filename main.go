@@ -13,10 +13,18 @@ import (
 const addr = ":8080"
 
 func main() {
-	store := db.NewInMemoryStore(makeQuotes())
-	repo := repository.NewQuoteRepository(store)
-
 	secret := os.Getenv("SECRET")
+	token := os.Getenv("TOKEN")
+	env := os.Getenv("ENV")
+
+	store := db.NewInMemoryStore(makeQuotes())
+	if env == "prod" {
+		s := db.NewTursoStore(token, "wise-pup-linkinlog")
+		if s != nil {
+			store = s
+		}
+	}
+	repo := repository.NewQuoteRepository(store)
 
 	err := handlers.NewHandler(repo, secret, false).HandleRoutes(addr)
 	if err != nil {

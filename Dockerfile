@@ -17,6 +17,12 @@ FROM alpine:latest
 ARG SECRET
 ENV SECRET=$SECRET
 
+ARG ENV
+ENV ENV=$ENV
+
+ARG TOKEN
+ENV TOKEN=$TOKEN
+
 WORKDIR /root/
 
 COPY --from=builder /app/main .

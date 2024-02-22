@@ -11,11 +11,11 @@ templ AddQuote(showSuccess bool) {
 		<form id="add-quote-form" hx-boost="true" action="/quotes" method="post">
 			<div>
 				<label for="quote">Quote</label>
-				<input type="text" id="content" name="content"/>
+				<input type="text" id="content" name="content" required/>
 			</div>
 			<div>
 				<label for="author">Author</label>
-				<input type="text" id="author" name="author"/>
+				<input type="text" id="author" name="author" required/>
 			</div>
 			<button type="submit">Add Quote</button>
 		</form>

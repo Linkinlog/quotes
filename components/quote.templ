@@ -19,7 +19,7 @@ templ Quote(q *models.Quote, admin bool) {
 					if q.Approved() {
 						<button hx-delete={ fmt.Sprintf("/quotes/%v", q.Id) } hx-target={ fmt.Sprintf("#quote-%v", q.Id) }>Disapprove</button>
 					} else {
-						<button hx-post={ fmt.Sprintf("/quotes/%v/toggle", q.Id) } hx-target={ fmt.Sprintf("#quote-%v", q.Id) }>Approve</button>
+						<button hx-post={ fmt.Sprintf("/quotes/%v/approve", q.Id) } hx-target={ fmt.Sprintf("#quote-%v", q.Id) }>Approve</button>
 					}
 					<button hx-get={ fmt.Sprintf("/quotes/%v/edit", q.Id) }>Edit</button>
 				</div>

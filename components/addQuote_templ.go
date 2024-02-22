@@ -33,7 +33,7 @@ func AddQuote(showSuccess bool) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h1>Add Quote</h1><form id=\"add-quote-form\" hx-boost=\"true\" action=\"/quotes\" method=\"post\"><div><label for=\"quote\">Quote</label> <input type=\"text\" id=\"content\" name=\"content\"></div><div><label for=\"author\">Author</label> <input type=\"text\" id=\"author\" name=\"author\"></div><button type=\"submit\">Add Quote</button></form></main>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h1>Add Quote</h1><form id=\"add-quote-form\" hx-boost=\"true\" action=\"/quotes\" method=\"post\"><div><label for=\"quote\">Quote</label> <input type=\"text\" id=\"content\" name=\"content\" required></div><div><label for=\"author\">Author</label> <input type=\"text\" id=\"author\" name=\"author\" required></div><button type=\"submit\">Add Quote</button></form></main>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

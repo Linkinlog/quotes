@@ -5,9 +5,10 @@ templ Index(contents templ.Component) {
 	<html lang="en">
 		<head>
 			<meta charset="UTF-8"/>
-			<link rel="icon" type="image/svg+xml" href="/assets/wisePup.jpeg"/>
+			<link rel="icon" type="image/svg+xml" href="/assets/wisePup.webp"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<meta name="theme-color" media="(prefers-color-scheme: dark)" content="black"/>
+			<meta name="description" content="Wise Pup Quotes"/>
 			<script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
 			@ga()
 			<title>Wise Pup Quotes</title>
@@ -17,7 +18,7 @@ templ Index(contents templ.Component) {
 				@Nav()
 				<h1>Wise Pup</h1>
 				<br/>
-				<img id="wisePup" src="/assets/wisePup.jpeg" alt="wise pup"/>
+				<img id="wisePup" src="/assets/wisePup.webp" alt="wise pup"/>
 				@contents
 			</main>
 		</body>
@@ -49,7 +50,8 @@ templ Index(contents templ.Component) {
 
         a {
           font-weight: 500;
-          color: #646cff;
+          color: #C05CFF
+          cursor: pointer;
           text-decoration: inherit;
         }
 
@@ -125,13 +127,13 @@ templ Index(contents templ.Component) {
           color: rgba(255, 255, 255, 0.6);
         }
         img#wisePup {
-          height: 256px;
-          width: 256px;
+          height: 300px;
+          width: 200px;
         }
         @media screen and (max-width: 767px) {
             img#wisePup {
-                height: 128px;
-                width: 128px;
+                height: 157px;
+                width: 105px;
             }
         }
     </style>

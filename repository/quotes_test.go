@@ -202,3 +202,77 @@ func TestUpdateQuote(t *testing.T) {
 		})
 	}
 }
+
+func TestApproveQuote(t *testing.T) {
+	tests := map[string]struct {
+		wantError  bool
+		updateMock func(*dbfakes.FakeQuoteStore)
+	}{
+		"valid quote is approved": {
+			updateMock: func(fakeStore *dbfakes.FakeQuoteStore) {
+				fakeStore.QueryByIdReturns(&models.Quote{Content: "This is a quote", Author: "John Doe"}, nil)
+			},
+		},
+		"error in queryById": {
+			wantError: true,
+			updateMock: func(fakeStore *dbfakes.FakeQuoteStore) {
+				fakeStore.QueryByIdReturns(nil, errors.New("generic error"))
+			},
+		},
+		"quote not found": {
+			updateMock: func(fakeStore *dbfakes.FakeQuoteStore) {
+				fakeStore.QueryByIdReturns(nil, nil)
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			fakeStore := &dbfakes.FakeQuoteStore{}
+			tc.updateMock(fakeStore)
+
+			rErr := repository.NewQuoteRepository(fakeStore).Approve(uuid.New())
+
+			if rErr != nil && !tc.wantError {
+				t.Fail()
+			}
+		})
+	}
+}
+
+func TestDeleteQuote(t *testing.T) {
+	tests := map[string]struct {
+		wantError  bool
+		updateMock func(*dbfakes.FakeQuoteStore)
+	}{
+		"valid quote is deleted": {
+			updateMock: func(fakeStore *dbfakes.FakeQuoteStore) {
+				fakeStore.QueryByIdReturns(&models.Quote{Content: "This is a quote", Author: "John Doe"}, nil)
+			},
+		},
+		"error in queryById": {
+			wantError: true,
+			updateMock: func(fakeStore *dbfakes.FakeQuoteStore) {
+				fakeStore.QueryByIdReturns(nil, errors.New("generic error"))
+			},
+		},
+		"quote not found": {
+			updateMock: func(fakeStore *dbfakes.FakeQuoteStore) {
+				fakeStore.QueryByIdReturns(nil, nil)
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			fakeStore := &dbfakes.FakeQuoteStore{}
+			tc.updateMock(fakeStore)
+
+			rErr := repository.NewQuoteRepository(fakeStore).Delete(uuid.New())
+
+			if rErr != nil && !tc.wantError {
+				t.Fail()
+			}
+		})
+	}
+}

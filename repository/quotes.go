@@ -57,3 +57,27 @@ func (r *QuoteRepository) Update(id uuid.UUID, content, author string) (*models.
 	}
 	return quote, nil
 }
+
+func (r *QuoteRepository) Approve(id uuid.UUID) error {
+	q, err := r.store.QueryById(id)
+	if err != nil {
+		return err
+	}
+	if q == nil {
+		return nil
+	}
+	q.Approve()
+	return r.store.Update(q)
+}
+
+func (r *QuoteRepository) Delete(id uuid.UUID) error {
+	q, err := r.store.QueryById(id)
+	if err != nil {
+		return err
+	}
+	if q == nil {
+		return nil
+	}
+	q.Disapprove()
+	return r.store.Delete(id)
+}

@@ -122,7 +122,7 @@ func Quote(q *models.Quote, admin bool) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("/quotes/%v/toggle", q.Id)))
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("/quotes/%v/approve", q.Id)))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}

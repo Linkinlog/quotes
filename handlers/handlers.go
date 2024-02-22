@@ -25,13 +25,14 @@ func (h *Handler) HandleRoutes(addr string) error {
 	mux.Handle("GET /assets/", http.StripPrefix("/assets/", http.FileServer(http.FS(assets.Files()))))
 
 	mux.HandleFunc("GET /", h.HandleAuthMiddleware(h.HandleLanding))
+	mux.HandleFunc("GET /robots.txt", h.HandleAuthMiddleware(h.HandleRobots))
 	mux.HandleFunc("GET /about", h.HandleAuthMiddleware(h.HandleAbout))
 	mux.HandleFunc("GET /add", h.HandleAuthMiddleware(h.HandleCreateForm))
 	mux.HandleFunc("GET /quotes", h.HandleAuthMiddleware(h.HandleQuotes))
 	mux.HandleFunc("GET /quotes/random", h.HandleAuthMiddleware(h.HandleRandomQuote))
 	mux.HandleFunc("GET /quotes/{id}", h.HandleAuthMiddleware(h.HandleQuoteById))
 	mux.HandleFunc("GET /quotes/{id}/edit", h.HandleAuthMiddleware(h.HandleEditForm))
-	mux.HandleFunc("POST /quotes/{id}/toggle", h.HandleAuthMiddleware(h.HandleApproveQuote))
+	mux.HandleFunc("POST /quotes/{id}/approve", h.HandleAuthMiddleware(h.HandleApproveQuote))
 	mux.HandleFunc("DELETE /quotes/{id}", h.HandleAuthMiddleware(h.HandleDeleteQuote))
 	mux.HandleFunc("POST /quotes", h.HandleAuthMiddleware(h.HandleCreateQuote))
 	mux.HandleFunc("PUT /quotes/{id}", h.HandleAuthMiddleware(h.HandleUpdateQuote))
@@ -41,6 +42,14 @@ func (h *Handler) HandleRoutes(addr string) error {
 
 func (h *Handler) HandleLanding(w http.ResponseWriter, r *http.Request) {
 	err := components.Index(components.Landing()).Render(r.Context(), w)
+	if err != nil {
+		slog.Error(err.Error())
+		return
+	}
+}
+
+func (h *Handler) HandleRobots(w http.ResponseWriter, r *http.Request) {
+	_, err := w.Write([]byte("User-agent: *\nDisallow: /"))
 	if err != nil {
 		slog.Error(err.Error())
 		return
@@ -67,6 +76,7 @@ func (h *Handler) HandleQuotes(w http.ResponseWriter, r *http.Request) {
 	q, rErr := h.quoteRepo.All()
 	if rErr != nil {
 		http.Error(w, "Error getting random quote", http.StatusInternalServerError)
+		slog.Error(rErr.Error())
 		return
 	}
 	err := components.Index(components.Quotes(q, h.admin)).Render(r.Context(), w)
@@ -80,6 +90,7 @@ func (h *Handler) HandleRandomQuote(w http.ResponseWriter, r *http.Request) {
 	q, rErr := h.quoteRepo.Random()
 	if rErr != nil {
 		http.Error(w, "Error getting random quote", http.StatusInternalServerError)
+		slog.Error(rErr.Error())
 		return
 	}
 	err := components.Quote(q, h.admin).Render(r.Context(), w)
@@ -99,6 +110,7 @@ func (h *Handler) HandleQuoteById(w http.ResponseWriter, r *http.Request) {
 		q, err := h.quoteRepo.ById(id)
 		if err != nil {
 			http.Error(w, "Error getting random quote", http.StatusInternalServerError)
+			slog.Error(err.Error())
 			return
 		}
 		rErr := components.Index(components.Quote(q, h.admin)).Render(r.Context(), w)
@@ -113,11 +125,13 @@ func (h *Handler) HandleCreateQuote(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		http.Error(w, "Error parsing form", http.StatusInternalServerError)
+		slog.Error(err.Error())
 		return
 	}
 	err = h.quoteRepo.Insert(r.FormValue("content"), r.FormValue("author"))
 	if err != nil {
 		http.Error(w, "Error inserting quote", http.StatusInternalServerError)
+		slog.Error(err.Error())
 		return
 	}
 	rErr := components.Index(components.AddQuote(true)).Render(r.Context(), w)
@@ -135,6 +149,7 @@ func (h *Handler) HandleUpdateQuote(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		http.Error(w, "Error parsing form", http.StatusInternalServerError)
+		slog.Error(err.Error())
 		return
 	}
 	id, err := uuid.Parse(r.PathValue("id"))
@@ -145,6 +160,7 @@ func (h *Handler) HandleUpdateQuote(w http.ResponseWriter, r *http.Request) {
 	q, err := h.quoteRepo.Update(id, r.FormValue("content"), r.FormValue("author"))
 	if err != nil {
 		http.Error(w, "Error updating quote", http.StatusInternalServerError)
+		slog.Error(err.Error())
 		return
 	}
 	if q == nil {
@@ -171,6 +187,7 @@ func (h *Handler) HandleApproveQuote(w http.ResponseWriter, r *http.Request) {
 	q, err := h.quoteRepo.ById(id)
 	if err != nil {
 		http.Error(w, "Error getting quote", http.StatusInternalServerError)
+		slog.Error(err.Error())
 		return
 	}
 	if q == nil {
@@ -178,6 +195,12 @@ func (h *Handler) HandleApproveQuote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	aErr := h.quoteRepo.Approve(id)
+	if aErr != nil {
+		http.Error(w, "Error approving quote", http.StatusInternalServerError)
+		slog.Error(aErr.Error())
+		return
+	}
 	q.Approve()
 	err = components.Quote(q, h.admin).Render(r.Context(), w)
 	if err != nil {
@@ -199,6 +222,7 @@ func (h *Handler) HandleDeleteQuote(w http.ResponseWriter, r *http.Request) {
 	q, err := h.quoteRepo.ById(id)
 	if err != nil {
 		http.Error(w, "Error getting quote", http.StatusInternalServerError)
+		slog.Error(err.Error())
 		return
 	}
 	if q == nil {
@@ -206,6 +230,12 @@ func (h *Handler) HandleDeleteQuote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	dErr := h.quoteRepo.Delete(id)
+	if dErr != nil {
+		http.Error(w, "Error approving quote", http.StatusInternalServerError)
+		slog.Error(dErr.Error())
+		return
+	}
 	q.Disapprove()
 	err = components.Quote(q, h.admin).Render(r.Context(), w)
 	if err != nil {
@@ -227,6 +257,7 @@ func (h *Handler) HandleEditForm(w http.ResponseWriter, r *http.Request) {
 	q, err := h.quoteRepo.ById(id)
 	if err != nil {
 		http.Error(w, "Error getting quote", http.StatusInternalServerError)
+		slog.Error(err.Error())
 		return
 	}
 	if q == nil {
@@ -246,6 +277,7 @@ func (h *Handler) HandleAuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		val, err := r.Cookie("auth")
 		if err != nil {
 			next.ServeHTTP(w, r)
+			slog.Error(err.Error())
 			return
 		}
 
