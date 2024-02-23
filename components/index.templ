@@ -1,6 +1,6 @@
 package components
 
-templ Index(contents templ.Component) {
+templ Index(contents templ.Component, title, description string) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -9,6 +9,10 @@ templ Index(contents templ.Component) {
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<meta name="theme-color" media="(prefers-color-scheme: dark)" content="black"/>
 			<meta name="description" content="Wise Pup Quotes"/>
+			<meta property="og:title" content={ title }/>
+			<meta property="og:description" content={ description }/>
+			<meta property="og:image" content="/assets/wisePup.webp"/>
+			<meta property="og:type" content="website"/>
 			<script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
 			@ga()
 			<title>Wise Pup Quotes</title>

@@ -21,7 +21,7 @@ templ Quote(q *models.Quote, admin bool) {
 					} else {
 						<button hx-post={ fmt.Sprintf("/quotes/%v/approve", q.Id) } hx-target={ fmt.Sprintf("#quote-%v", q.Id) }>Approve</button>
 					}
-					<button hx-get={ fmt.Sprintf("/quotes/%v/edit", q.Id) }>Edit</button>
+					<button hx-get={ fmt.Sprintf("/quotes/%v/edit", q.Id) } hx-select="#edit-quote-form" hx-swap="outerHTML">Edit</button>
 				</div>
 			}
 		</div>

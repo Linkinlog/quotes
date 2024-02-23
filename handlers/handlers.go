@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -41,7 +42,7 @@ func (h *Handler) HandleRoutes(addr string) error {
 }
 
 func (h *Handler) HandleLanding(w http.ResponseWriter, r *http.Request) {
-	err := components.Index(components.Landing()).Render(r.Context(), w)
+	err := components.Index(components.Landing(), "WisePup", "Quotes from a wise pup").Render(r.Context(), w)
 	if err != nil {
 		slog.Error(err.Error())
 		return
@@ -57,7 +58,7 @@ func (h *Handler) HandleRobots(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleAbout(w http.ResponseWriter, r *http.Request) {
-	err := components.Index(components.About()).Render(r.Context(), w)
+	err := components.Index(components.About(), "WisePup | About", "Made with HTMX, Go, Love, and more...").Render(r.Context(), w)
 	if err != nil {
 		slog.Error(err.Error())
 		return
@@ -65,7 +66,7 @@ func (h *Handler) HandleAbout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleCreateForm(w http.ResponseWriter, r *http.Request) {
-	err := components.Index(components.AddQuote(false)).Render(r.Context(), w)
+	err := components.Index(components.AddQuote(false), "WisePup | Create", "All quotes are appreciated").Render(r.Context(), w)
 	if err != nil {
 		slog.Error(err.Error())
 		return
@@ -79,7 +80,7 @@ func (h *Handler) HandleQuotes(w http.ResponseWriter, r *http.Request) {
 		slog.Error(rErr.Error())
 		return
 	}
-	err := components.Index(components.Quotes(q, h.admin)).Render(r.Context(), w)
+	err := components.Index(components.Quotes(q, h.admin), "WisePup | All Quotes", "Every quote, so far").Render(r.Context(), w)
 	if err != nil {
 		slog.Error(err.Error())
 		return
@@ -113,7 +114,7 @@ func (h *Handler) HandleQuoteById(w http.ResponseWriter, r *http.Request) {
 			slog.Error(err.Error())
 			return
 		}
-		rErr := components.Index(components.Quote(q, h.admin)).Render(r.Context(), w)
+		rErr := components.Index(components.Quote(q, h.admin), "WisePup", fmt.Sprintf("\"%s\"\n- %s", q.Content, q.Author)).Render(r.Context(), w)
 		if rErr != nil {
 			slog.Error(rErr.Error())
 			return
@@ -128,13 +129,16 @@ func (h *Handler) HandleCreateQuote(w http.ResponseWriter, r *http.Request) {
 		slog.Error(err.Error())
 		return
 	}
-	err = h.quoteRepo.Insert(r.FormValue("content"), r.FormValue("author"))
+	content := r.FormValue("content")
+	author := r.FormValue("author")
+
+	err = h.quoteRepo.Insert(content, author)
 	if err != nil {
 		http.Error(w, "Error inserting quote", http.StatusInternalServerError)
 		slog.Error(err.Error())
 		return
 	}
-	rErr := components.Index(components.AddQuote(true)).Render(r.Context(), w)
+	rErr := components.Index(components.AddQuote(true), "WisePup", fmt.Sprintf("\"%s\"\n- %s", content, author)).Render(r.Context(), w)
 	if rErr != nil {
 		slog.Error(rErr.Error())
 		return
@@ -264,7 +268,7 @@ func (h *Handler) HandleEditForm(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Quote not found", http.StatusNotFound)
 		return
 	}
-	err = components.Index(components.EditQuote(q, false)).Render(r.Context(), w)
+	err = components.Index(components.EditQuote(q, false), "WisePup - Edit", "Edit your quote!").Render(r.Context(), w)
 	if err != nil {
 		slog.Error(err.Error())
 		return
