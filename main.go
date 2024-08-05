@@ -10,23 +10,22 @@ import (
 	"github.com/Linkinlog/quotes/repository"
 )
 
-const addr = ":8080"
-
 func main() {
 	secret := os.Getenv("SECRET")
-	token := os.Getenv("TOKEN")
+	database := os.Getenv("DATABASE")
 	env := os.Getenv("ENV")
+	port := os.Getenv("PORT")
 
 	store := db.NewInMemoryStore(makeQuotes())
 	if env == "prod" {
-		s := db.NewTursoStore(token, "wise-pup-linkinlog")
+		s := db.NewTursoStore(database)
 		if s != nil {
 			store = s
 		}
 	}
 	repo := repository.NewQuoteRepository(store)
 
-	err := handlers.NewHandler(repo, secret, false).HandleRoutes(addr)
+	err := handlers.NewHandler(repo, secret, false).HandleRoutes(":" + port)
 	if err != nil {
 		slog.Error(err.Error())
 	}

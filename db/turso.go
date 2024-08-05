@@ -9,22 +9,21 @@ import (
 	"github.com/Linkinlog/quotes/models"
 	"github.com/google/uuid"
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
+	_ "modernc.org/sqlite"
 )
 
 type Turso struct {
-	Token    string
 	Database string
 	Conn     *sql.DB
 }
 
-func NewTursoStore(token, database string) QuoteStore {
-	dataSource := fmt.Sprintf("libsql://%s.turso.io?authToken=%s", database, token)
-	db, err := sql.Open("libsql", dataSource)
+func NewTursoStore(database string) QuoteStore {
+	db, err := sql.Open("libsql", database)
 	if err != nil {
-		slog.Error(fmt.Sprintf("failed to open db %s: %s", dataSource, err))
+		slog.Error(fmt.Sprintf("failed to open db %s: %s", database, err))
 		os.Exit(1)
 	}
-	return &Turso{Token: token, Database: database, Conn: db}
+	return &Turso{Database: database, Conn: db}
 }
 
 func (t *Turso) Insert(q *models.Quote) error {
