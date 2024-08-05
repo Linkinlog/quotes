@@ -38,6 +38,7 @@ func (h *Handler) HandleRoutes(addr string) error {
 	mux.HandleFunc("POST /quotes", h.HandleAuthMiddleware(h.HandleCreateQuote))
 	mux.HandleFunc("PUT /quotes/{id}", h.HandleAuthMiddleware(h.HandleUpdateQuote))
 
+	fmt.Printf("Listening on %s\n", addr)
 	return http.ListenAndServe(addr, mux)
 }
 
