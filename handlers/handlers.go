@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -280,7 +281,7 @@ func (h *Handler) HandleAuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h.admin = false
 		val, err := r.Cookie("auth")
-		if err != nil {
+		if err != nil && !errors.Is(err, http.ErrNoCookie){
 			next.ServeHTTP(w, r)
 			slog.Error(err.Error())
 			return
